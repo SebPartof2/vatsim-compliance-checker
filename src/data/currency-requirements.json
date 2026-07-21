@@ -1,11 +1,12 @@
 {
-  "_comment": "Currency requirements: minimum controlling hours to remain on a facility's roster. 'period' is 'quarter' (per calendar quarter) or 'half' (per calendar half-year). Set 'hours' for a single requirement, OR 'home'/'visitor' when they differ (each falls back to 'hours' if omitted). Keys are VATUSA facility codes. There is intentionally NO default — a facility not listed (or missing the relevant role's hours) shows as 'Unknown currency requirement'.",
   "facilities": {
     "HCF": { "period": "quarter", "hours": 3 },
     "ZSE": { "period": "quarter", "hours": 3 },
     "ZLC": { "period": "quarter", "hours": 3 },
     "ZOA": { "period": "quarter", "hours": 3 },
     "ZNY": { "period": "quarter", "hours": 2 },
+    "ZMP": { "period": "quarter", "hours": 3 },
+    "ZMA": { "period": "quarter", "hours": 3 },
     "ZID": { "period": "quarter", "home": 3, "visitor": 1 },
     "ZAN": { "period": "half", "hours": 2 }
   }

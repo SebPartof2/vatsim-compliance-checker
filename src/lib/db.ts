@@ -1,10 +1,19 @@
 import Database from "better-sqlite3";
+import { mkdirSync } from "node:fs";
+import { dirname } from "node:path";
 
 /**
  * Shared SQLite connection used by Better Auth and for reading auth data
  * (e.g. the linked Discord account id) elsewhere in the app.
  */
-export const db = new Database(process.env.DATABASE_PATH ?? "./sqlite.db");
+const dbPath = process.env.DATABASE_PATH ?? "./sqlite.db";
+
+// Ensure the parent directory exists. This matters during `next build`, which
+// evaluates route modules while the runtime volume (e.g. /data) isn't mounted
+// yet; without this, opening the DB throws "directory does not exist".
+mkdirSync(dirname(dbPath), { recursive: true });
+
+export const db = new Database(dbPath);
 
 /**
  * Return the Discord account id (snowflake) linked to a Better Auth user.
