@@ -8,6 +8,19 @@
     "ZMP": { "period": "quarter", "hours": 3 },
     "ZMA": { "period": "quarter", "hours": 3 },
     "ZID": { "period": "quarter", "home": 3, "visitor": 1 },
-    "ZAN": { "period": "half", "hours": 2 }
+    "ZAN": { "period": "half", "hours": 2 },
+    "ZKC": { "period": "quarter", "hours": 3 },
+    "ZHU": { "period": "quarter", "hours": 3 },
+    "ZFW": { "period": "quarter", "hours": 3 },
+    "ZDV": { "period": "quarter", "hours": 3 },
+    "ZOB": { "period": "quarter", "hours": 111 },
+    "ZJX": { "period": "quarter", "hours": 111 },
+    "ZAU": { "period": "quarter", "hours": 3 },
+    "ZBW": { "period": "quarter", "hours": 3 },
+    "ZTL": { "period": "quarter", "hours": 3 },
+    "ZAB": { "period": "quarter", "hours": 3 },
+    "ZDC": { "period": "quarter", "hours": 3 },
+    "ZME": { "period": "quarter", "hours": 3 },
+    "ZLA": { "period": "quarter", "hours": 1 }
   }
 }
