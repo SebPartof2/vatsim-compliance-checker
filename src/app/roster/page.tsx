@@ -7,12 +7,12 @@ import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
-import Button from "@mui/material/Button";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { resolveViewer } from "@/lib/dev-mode";
 import { getVatusaUser } from "@/lib/vatsim";
 import SignOutButton from "@/components/SignOutButton";
+import NavLinkButton from "@/components/NavLinkButton";
+import ThemeToggle from "@/components/ThemeToggle";
 import RosterReportView from "@/components/RosterReportView";
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -23,9 +23,8 @@ function Shell({ children }: { children: React.ReactNode }) {
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
             Roster Report
           </Typography>
-          <Button color="inherit" component={Link} href="/dashboard">
-            Dashboard
-          </Button>
+          <NavLinkButton href="/dashboard">Dashboard</NavLinkButton>
+          <ThemeToggle />
           <SignOutButton />
         </Toolbar>
       </AppBar>

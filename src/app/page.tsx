@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import { auth } from "@/lib/auth";
 import DiscordSignInButton from "@/components/DiscordSignInButton";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export default async function LoginPage() {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -22,10 +23,15 @@ export default async function LoginPage() {
         display: "grid",
         placeItems: "center",
         p: 2,
-        background:
-          "radial-gradient(1200px 600px at 50% -10%, #dff1fb 0%, #f4f6f8 60%)",
+        position: "relative",
+        // Theme-aware wash so this reads correctly in both schemes.
+        background: (theme) =>
+          `radial-gradient(1200px 600px at 50% -10%, ${theme.palette.primary.main}26 0%, ${theme.palette.background.default} 60%)`,
       }}
     >
+      <Box sx={{ position: "absolute", top: 12, right: 12 }}>
+        <ThemeToggle />
+      </Box>
       <Card sx={{ width: "100%", maxWidth: 420, boxShadow: 6 }}>
         <CardContent sx={{ p: 4 }}>
           <Stack spacing={1} alignItems="center" textAlign="center">

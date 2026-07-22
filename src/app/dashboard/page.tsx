@@ -14,8 +14,8 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Link from "@mui/material/Link";
-import Button from "@mui/material/Button";
-import NextLink from "next/link";
+import NavLinkButton from "@/components/NavLinkButton";
+import ThemeToggle from "@/components/ThemeToggle";
 import { auth } from "@/lib/auth";
 import { getDiscordAccountId } from "@/lib/db";
 import {
@@ -82,11 +82,8 @@ function Shell({
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
             Visiting Compliance
           </Typography>
-          {dev && (
-            <Button color="inherit" component={NextLink} href="/roster">
-              Roster
-            </Button>
-          )}
+          {dev && <NavLinkButton href="/roster">Roster</NavLinkButton>}
+          <ThemeToggle />
           <SignOutButton />
         </Toolbar>
       </AppBar>

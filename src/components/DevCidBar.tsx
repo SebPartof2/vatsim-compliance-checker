@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
@@ -49,7 +50,12 @@ export default function DevCidBar({
   const onlyDigits = (v: string) => v.replace(/[^0-9]/g, "");
 
   return (
-    <Box sx={{ bgcolor: "warning.light" }}>
+    <Box
+      sx={{
+        // Tinted rather than solid so it reads in both color schemes.
+        bgcolor: (theme) => alpha(theme.palette.warning.main, 0.18),
+      }}
+    >
       <Paper
         elevation={0}
         square

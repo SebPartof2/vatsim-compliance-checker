@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useColorScheme } from "@mui/material/styles";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
@@ -65,8 +66,12 @@ type CurrencyRow =
 
 const ONE_HOUR_MS = 3_600_000;
 
-/** Categorical palette (validated, slot order). Home = slot 1. */
-const CATEGORICAL = [
+/**
+ * Categorical palette (validated, slot order). Home = slot 1.
+ * The dark column is the same eight hues stepped for a dark surface, not a
+ * different palette — so identity stays stable across schemes.
+ */
+const CATEGORICAL_LIGHT = [
   "#2a78d6", // blue (home)
   "#eb6834", // orange
   "#1baf7a", // aqua
@@ -76,7 +81,17 @@ const CATEGORICAL = [
   "#4a3aa7", // violet
   "#e34948", // red
 ];
-const OTHER_COLOR = "#898781"; // muted grey
+const CATEGORICAL_DARK = [
+  "#3987e5",
+  "#d95926",
+  "#199e70",
+  "#c98500",
+  "#d55181",
+  "#008300",
+  "#9085e9",
+  "#e66767",
+];
+const OTHER_COLOR = "#898781"; // muted grey, works on both surfaces
 
 interface Period {
   key: string;
@@ -244,7 +259,15 @@ function Donut({
   let offset = 0;
 
   return (
-    <Box sx={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+    <Box
+      sx={{
+        position: "relative",
+        width: size,
+        height: size,
+        flexShrink: 0,
+        color: "divider", // used by the empty-state ring below
+      }}
+    >
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
           {total > 0 ? (
@@ -274,7 +297,7 @@ function Donut({
               cy={size / 2}
               r={r}
               fill="none"
-              stroke="#e1e0d9"
+              stroke="currentColor"
               strokeWidth={thickness}
             />
           )}
@@ -313,6 +336,13 @@ export default function ControllingPanel({
   const [quarterKey, setQuarterKey] = useState(currentQuarterKey());
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(50);
+
+  // Chart hues are stepped per color scheme.
+  const { mode, systemMode } = useColorScheme();
+  const categorical =
+    (mode === "system" ? systemMode : mode) === "dark"
+      ? CATEGORICAL_DARK
+      : CATEGORICAL_LIGHT;
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -412,7 +442,7 @@ export default function ControllingPanel({
     // Pie slices: home, each visiting facility with time, then "Other".
     const slices: Slice[] = [];
     if (homeMs > 0) {
-      slices.push({ label: home.name, value: homeMs, color: CATEGORICAL[0] });
+      slices.push({ label: home.name, value: homeMs, color: categorical[0] });
     }
     let ci = 1;
     for (const v of visiting) {
@@ -421,7 +451,7 @@ export default function ControllingPanel({
         slices.push({
           label: v.name,
           value: ms,
-          color: CATEGORICAL[ci % CATEGORICAL.length] ?? OTHER_COLOR,
+          color: categorical[ci % categorical.length] ?? OTHER_COLOR,
         });
         ci += 1;
       }
@@ -441,7 +471,7 @@ export default function ControllingPanel({
       homePct,
       slices,
     };
-  }, [sessions, quarter, home, visiting]);
+  }, [sessions, quarter, home, visiting, categorical]);
 
   // ---- Currency compliance (per rostered facility, shared quarter) ----
   const currency = useMemo<CurrencyRow[]>(() => {

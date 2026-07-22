@@ -32,6 +32,14 @@ export const auth = betterAuth({
       clientSecret: process.env.DISCORD_CLIENT_SECRET as string,
     },
   },
+  advanced: {
+    ipAddress: {
+      // Railway (and most PaaS proxies) terminate TLS and forward the client
+      // IP here. Without this, Better Auth rate limiting falls back to one
+      // shared bucket for every visitor.
+      ipAddressHeaders: ["x-forwarded-for"],
+    },
+  },
   // Ensures Set-Cookie headers from server actions/route handlers are applied.
   plugins: [nextCookies()],
 });
