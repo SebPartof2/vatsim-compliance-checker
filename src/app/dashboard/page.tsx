@@ -14,6 +14,8 @@ import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
 import Avatar from "@mui/material/Avatar";
 import Link from "@mui/material/Link";
+import Button from "@mui/material/Button";
+import NextLink from "next/link";
 import { auth } from "@/lib/auth";
 import { getDiscordAccountId } from "@/lib/db";
 import {
@@ -27,17 +29,7 @@ import SignOutButton from "@/components/SignOutButton";
 import DevCidBar from "@/components/DevCidBar";
 import ControllingPanel from "@/components/ControllingPanel";
 
-const IS_DEV = process.env.NODE_ENV === "development";
-
-/**
- * CIDs allowed to use dev mode (the CID/Discord override bar) in production.
- * Set DEV_CIDS to a comma-separated list of VATSIM CIDs. In development, dev
- * mode is on for everyone regardless.
- */
-const DEV_CIDS = (process.env.DEV_CIDS ?? "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
+import { IS_DEV, DEV_CIDS } from "@/lib/dev-mode";
 
 /** Format an ISO timestamp as e.g. "Oct 19, 2025". */
 function formatDate(iso: string): string {
@@ -90,6 +82,11 @@ function Shell({
           <Typography variant="h6" sx={{ flexGrow: 1, fontWeight: 700 }}>
             Visiting Compliance
           </Typography>
+          {dev && (
+            <Button color="inherit" component={NextLink} href="/roster">
+              Roster
+            </Button>
+          )}
           <SignOutButton />
         </Toolbar>
       </AppBar>

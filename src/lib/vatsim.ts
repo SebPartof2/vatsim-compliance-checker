@@ -1,3 +1,5 @@
+import { scheduleVatsim, type Priority } from "./vatsim-queue";
+
 /**
  * VATSIM / VATUSA lookups.
  *
@@ -166,6 +168,7 @@ export async function getAtcSessions(
   cid: string | number,
   limit: number,
   offset: number,
+  priority: Priority = "high",
 ): Promise<AtcSessionsResult> {
   const safeLimit = Math.max(Math.trunc(limit) || 1, 1);
   const safeOffset = Math.max(Math.trunc(offset) || 0, 0);
@@ -175,10 +178,16 @@ export async function getAtcSessions(
   let res: Response;
   for (let attempt = 0; ; attempt++) {
     try {
-      res = await fetch(url, {
-        headers: { Accept: "application/json" },
-        cache: "no-store",
-      });
+      // Goes through the shared scheduler so background work can't starve
+      // interactive requests or blow the rate limit.
+      res = await scheduleVatsim(
+        () =>
+          fetch(url, {
+            headers: { Accept: "application/json" },
+            cache: "no-store",
+          }),
+        priority,
+      );
     } catch (err) {
       return {
         status: "error",
@@ -230,21 +239,25 @@ export async function getAtcSessions(
 }
 
 /**
- * Fetch ALL of a member's ATC sessions in just two requests: one tiny call to
- * learn the total `count`, then one call with `limit=count` to pull the rest.
- * This keeps us well within VATSIM's rate limit. Still never persisted — the
- * caller holds the result only for the current view.
+ * Fetch ALL of a member's ATC sessions. `limit` has no documented maximum, so
+ * a single request with a very large limit normally returns everything (and
+ * `count` lets us confirm). That keeps this to ONE rate-limited call per
+ * member — important when reporting across a whole roster.
  */
+const ATC_FETCH_ALL_LIMIT = 100_000;
+
 export async function getAllAtcSessions(
   cid: string | number,
+  priority: Priority = "high",
 ): Promise<AtcSessionsResult> {
-  // 1) Cheap probe for the total count.
-  const head = await getAtcSessions(cid, 1, 0);
-  if (head.status !== "ok") return head;
-  if (head.count <= head.items.length) return head; // 0 or 1 session
+  const all = await getAtcSessions(cid, ATC_FETCH_ALL_LIMIT, 0, priority);
+  if (all.status !== "ok") return all;
 
-  // 2) One call for everything.
-  return getAtcSessions(cid, head.count, 0);
+  // Safety net: if the API capped the page size, ask for exactly `count`.
+  if (all.items.length < all.count) {
+    return getAtcSessions(cid, all.count, 0, priority);
+  }
+  return all;
 }
 
 /** A VATUSA facility (subdivision). */
