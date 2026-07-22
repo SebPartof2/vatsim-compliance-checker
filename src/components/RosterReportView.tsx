@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Stack from "@mui/material/Stack";
@@ -18,6 +18,7 @@ import TableBody from "@mui/material/TableBody";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import Chip from "@mui/material/Chip";
 import Alert from "@mui/material/Alert";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -28,6 +29,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 interface MemberCurrency {
   cid: number;
   name: string;
+  rating: number;
   ratingShort: string;
   membership: "home" | "visit";
   status: "pending" | "done" | "error";
@@ -54,6 +56,8 @@ interface QueueStats {
   usedInWindow: number;
   maxPerWindow: number;
 }
+
+type SortKey = "name" | "membership" | "rating" | "ms";
 
 function formatHM(ms: number): string {
   const total = Math.round(ms / 60000);
@@ -89,6 +93,8 @@ export default function RosterReportView({
   const [queue, setQueue] = useState<QueueStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [orderBy, setOrderBy] = useState<SortKey>("rating");
+  const [order, setOrder] = useState<"asc" | "desc">("desc");
   // Facility/quarter the currently displayed job belongs to.
   const active = useRef<{ facility: string; quarter: string } | null>(null);
 
@@ -140,6 +146,42 @@ export default function RosterReportView({
       setError((e as Error).message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  const sortedMembers = useMemo(() => {
+    const rows = [...(job?.members ?? [])];
+    rows.sort((a, b) => {
+      let cmp = 0;
+      switch (orderBy) {
+        case "name":
+          cmp = a.name.localeCompare(b.name);
+          break;
+        case "membership":
+          cmp = a.membership.localeCompare(b.membership);
+          break;
+        case "rating":
+          cmp = a.rating - b.rating;
+          break;
+        case "ms":
+          // Not-yet-checked rows sort last regardless of direction.
+          cmp = (a.ms ?? -1) - (b.ms ?? -1);
+          break;
+      }
+      // Stable tiebreak so rows don't jitter as results stream in.
+      if (cmp === 0) cmp = a.cid - b.cid;
+      return order === "asc" ? cmp : -cmp;
+    });
+    return rows;
+  }, [job?.members, orderBy, order]);
+
+  function toggleSort(key: SortKey) {
+    if (orderBy === key) {
+      setOrder(order === "asc" ? "desc" : "asc");
+    } else {
+      setOrderBy(key);
+      // Text ascends, numbers descend by default.
+      setOrder(key === "name" || key === "membership" ? "asc" : "desc");
     }
   }
 
@@ -264,17 +306,57 @@ export default function RosterReportView({
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Controller</TableCell>
+                    <TableCell sortDirection={orderBy === "name" ? order : false}>
+                      <TableSortLabel
+                        active={orderBy === "name"}
+                        direction={orderBy === "name" ? order : "asc"}
+                        onClick={() => toggleSort("name")}
+                      >
+                        Controller
+                      </TableSortLabel>
+                    </TableCell>
                     <TableCell>CID</TableCell>
-                    <TableCell>Role</TableCell>
-                    <TableCell align="right">Rating</TableCell>
-                    <TableCell align="right">Time</TableCell>
+                    <TableCell
+                      sortDirection={orderBy === "membership" ? order : false}
+                    >
+                      <TableSortLabel
+                        active={orderBy === "membership"}
+                        direction={orderBy === "membership" ? order : "asc"}
+                        onClick={() => toggleSort("membership")}
+                      >
+                        Role
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sortDirection={orderBy === "rating" ? order : false}
+                    >
+                      <TableSortLabel
+                        active={orderBy === "rating"}
+                        direction={orderBy === "rating" ? order : "desc"}
+                        onClick={() => toggleSort("rating")}
+                      >
+                        Rating
+                      </TableSortLabel>
+                    </TableCell>
+                    <TableCell
+                      align="right"
+                      sortDirection={orderBy === "ms" ? order : false}
+                    >
+                      <TableSortLabel
+                        active={orderBy === "ms"}
+                        direction={orderBy === "ms" ? order : "desc"}
+                        onClick={() => toggleSort("ms")}
+                      >
+                        Time
+                      </TableSortLabel>
+                    </TableCell>
                     <TableCell align="right">Required</TableCell>
                     <TableCell align="right">Status</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {job.members.map((m) => (
+                  {sortedMembers.map((m) => (
                     <TableRow key={m.cid} hover>
                       <TableCell sx={{ fontWeight: 500 }}>{m.name}</TableCell>
                       <TableCell>{m.cid}</TableCell>

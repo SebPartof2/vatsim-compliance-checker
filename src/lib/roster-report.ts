@@ -26,6 +26,8 @@ const JOB_TTL_MS = 60 * 60 * 1000;
 export interface MemberCurrency {
   cid: number;
   name: string;
+  /** Numeric VATSIM rating, so callers can sort by seniority. */
+  rating: number;
   ratingShort: string;
   membership: "home" | "visit";
   status: "pending" | "done" | "error";
@@ -124,6 +126,7 @@ async function runReport(job: ReportJob): Promise<void> {
     job.members = roster.members.map((m) => ({
       cid: m.cid,
       name: `${m.fname} ${m.lname}`.trim(),
+      rating: m.rating,
       ratingShort: m.ratingShort,
       membership: m.membership,
       status: "pending" as const,
