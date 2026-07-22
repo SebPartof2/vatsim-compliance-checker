@@ -24,9 +24,11 @@ export default async function LoginPage() {
         placeItems: "center",
         p: 2,
         position: "relative",
-        // Theme-aware wash so this reads correctly in both schemes.
-        background: (theme) =>
-          `radial-gradient(1200px 600px at 50% -10%, ${theme.palette.primary.main}26 0%, ${theme.palette.background.default} 60%)`,
+        // Static string (not a theme callback): this is a Server Component, and
+        // a function in `sx` can't be serialized across the RSC boundary.
+        // MUI's CSS variables still make it color-scheme aware.
+        background:
+          "radial-gradient(1200px 600px at 50% -10%, rgba(var(--mui-palette-primary-mainChannel) / 0.15) 0%, var(--mui-palette-background-default) 60%)",
       }}
     >
       <Box sx={{ position: "absolute", top: 12, right: 12 }}>
